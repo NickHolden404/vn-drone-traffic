@@ -1,0 +1,7 @@
+# Demo: UIT-ADrone DJI_0143.MP4 (location C, P-train pool video, not a test video), 60 s from --start 60.
+# Line at the roundabout's south exit, drawn on the segment's first frame.
+seq_id: DJI_0143
+set_name: demo
+ref_frame: 0
+lines:
+  - {name: south_exit, p1: [610, 930], p2: [1260, 930]}

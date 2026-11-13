@@ -1,0 +1,12 @@
+model: teacher-fused
+set: VD-tune
+cache_tag: 08a21e9a6104
+imgsz: 1280
+conf: 0.01
+thresholds:
+  motorbike: 0.2852753698825836
+  car: 0.3814026415348053
+  bus: 0.4274066686630249
+  truck: 0.43584921956062317
+  bicycle: 0.3633165955543518
+  pedestrian: 0.3237813711166382

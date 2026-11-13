@@ -1,0 +1,15 @@
+# Active-learning secondary fallbacks (pre-declared 2026-11-03 before any T-VN evaluation of an AL run;
+# `fallbacks` in configs/al.yaml): the primary run al-m-variety-800 as TensorRT FP16 at 1536 and
+# tiled (full frame 1280 + 640-px native tiles, 20% overlap, as in the deployment grid). The 640 and 1280 engines
+# exist only as the tiled point's parts (1280 is the headline engine: export/bench skip it when up to
+# date); `scripts\al.ps1 -Step fallback` benchmarks and evaluates only the two fallback points.
+# register -> configs/models_deploy_al_fallback.yaml, used with
+#   --models configs/models.yaml,configs/models_al.yaml,configs/models_deploy_al_fallback.yaml
+# (not together with configs/models_deploy_al.yaml: both define al-m-variety-800@1280-fp16).
+students: [al-m-variety-800]
+sizes: [640, 1280, 1536]
+precisions: [fp16]
+fp32_sizes: []
+tiled: {full_imgsz: 1280, tile: 640, overlap: 0.2}
+calibration: {list: configs/train/src_pseudo.yaml, n: 512, seed: 0}
+bench: {every: 30, n: 199, warmup: 20}  # T-VN has 5,950 images: every 30th gives 199

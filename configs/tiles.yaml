@@ -1,0 +1,14 @@
+# Static batch-1 vs batched tile engines (README block `tiles`, `cvt report`). Every latency here is
+# timed in one session into `latency` by scripts\tiles.ps1 (the earlier timings came from other
+# sessions on a machine whose speed varied), together with `reference`, a full-frame point whose
+# The deployment timing (reports/latency.csv) shows how fast the machine ran. Accuracy: T-VN/T-VD at 1280.
+latency: reports/latency_tiles.csv
+reference: src_pseudo-yolo11m-s0@1280-fp16
+pairs:  # same weights, tiles and merge; only the tile engine's batch differs
+  - {static: src_pseudo-yolo11n-s0@1280+tiles640-fp16, batched: src_pseudo-yolo11n-s0@1280+tiles640b32-fp16}
+  - {static: src_pseudo-yolo11n-s0@1280+tiles640-int8, batched: src_pseudo-yolo11n-s0@1280+tiles640b32-int8}
+  - {static: src_pseudo-yolo11s-s0@1280+tiles640-fp16, batched: src_pseudo-yolo11s-s0@1280+tiles640b32-fp16}
+  - {static: src_pseudo-yolo11s-s0@1280+tiles640-int8, batched: src_pseudo-yolo11s-s0@1280+tiles640b32-int8}
+  - {static: src_pseudo-yolo11m-s0@1280+tiles640-fp16, batched: src_pseudo-yolo11m-s0@1280+tiles640b32-fp16}
+  - {static: src_pseudo-yolo11m-s0@1280+tiles640-int8, batched: src_pseudo-yolo11m-s0@1280+tiles640b32-int8}
+  - {static: al-m-variety-800@1280+tiles640-fp16, batched: al-m-variety-800@1280+tiles640b32-fp16}

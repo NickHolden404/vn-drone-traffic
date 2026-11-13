@@ -1,0 +1,17 @@
+/data/
+runs/
+*.pt
+*.onnx
+*.engine
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+/configs/train/
+/data/tracks/
+/data/engines/
+/reports/demo/*.mp4
+/reports/demo/*.csv
+/reports/demo/*.png
+/data/demo_out/

@@ -1,0 +1,14 @@
+# Active-learning headline engines (pre-declared before any T-VN evaluation):
+# the three m active-learning students as TensorRT FP16 engines at 1280 (no FP32 references, no tiled
+# points). Students come from configs/models_al.yaml (`cvt al prepare`), so every command takes
+#   --config configs/deploy_al.yaml --models configs/models.yaml,configs/models_al.yaml
+# export -> data/engines/; register -> configs/models_deploy_al.yaml (never configs/models_deploy.yaml);
+# bench -> reports/latency.csv; `scripts\al.ps1 -Step engine` runs all of it plus `cvt eval`.
+students: [al-m-variety-800, al-m-random-800, al-m-all]  # al-m-variety-800 = headline (configs/al.yaml)
+sizes: [1280]
+precisions: [fp16]
+fp32_sizes: []
+tiled: null
+# same blocks as configs/deploy.yaml (calibration is unused for FP16)
+calibration: {list: configs/train/src_pseudo.yaml, n: 512, seed: 0}
+bench: {every: 30, n: 199, warmup: 20}  # T-VN has 5,950 images: every 30th gives 199

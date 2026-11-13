@@ -1,0 +1,15 @@
+# botsort-tuned3b: grid 3b on MOT-tune, detector src_pseudo-yolo11m-s0@1536-fp16, best of 192 by class-combined HOTA (0.5142); written by `cvt track tune --grid 3b`, grid in reports/tracker_grid_botsort_3b_src_pseudo-yolo11m-s0@1536-fp16.csv
+name: botsort-tuned3b
+frame_rate: 30
+tracker_type: botsort
+track_high_thresh: 0.3
+track_low_thresh: 0.1
+new_track_thresh: 0.7
+track_buffer: 60
+match_thresh: 0.7
+fuse_score: true
+gmc_method: sparseOptFlow
+proximity_thresh: 0.5
+appearance_thresh: 0.8
+with_reid: false
+model: auto

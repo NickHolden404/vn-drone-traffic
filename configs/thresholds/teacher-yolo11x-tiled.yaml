@@ -1,0 +1,12 @@
+model: teacher-yolo11x-tiled
+set: VD-tune
+cache_tag: d93072988f51
+imgsz: 1280
+conf: 0.01
+thresholds:
+  motorbike: 0.3171079456806183
+  car: 0.4288782477378845
+  bus: 0.44686028361320496
+  truck: 0.4839789569377899
+  bicycle: 0.41752588748931885
+  pedestrian: 0.2966025173664093

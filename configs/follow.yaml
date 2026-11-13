@@ -1,0 +1,25 @@
+# Target lock and virtual-gimbal follow (`cvt follow tune` / `cvt follow eval`, README
+# block `follow`; scripts\follow.ps1). Pre-declared before any lock or gimbal result: the grids are
+# run on MOT-tune only (`cvt follow tune` refuses any other set), then frozen in
+# configs/follow.tuned.yaml for T-MOT and T-UAVDT.
+detector: src_pseudo-yolo11m-s0@1536-fp16
+models: configs/models.yaml,configs/models_deploy.yaml
+tracker: configs/trackers/botsort.tuned3b.src_pseudo-yolo11m-s0@1536-fp16.yaml
+# Native frame rate per set (times are in seconds). Recorded assumption: VisDrone-MOT, UAVDT
+# (incl. UAVDT-S) and UAV123 / UAV20L videos are 30 fps per their papers (the manifests and the
+# benchmark annotations carry no frame rate). Benchmark lists: configs/follow_sot.yaml.
+fps: {MOT-tune: 30, T-MOT: 30, T-UAVDT: 30, UAVDT-S: 30, UAV123-veh: 30, UAV20L-veh: 30}
+min_s: 5  # lock tests: GT vehicle tracks (car, truck, bus, motorbike) spanning >= 5 s
+hfov_deg: 84  # nominal horizontal field of view, used only for the MAVLink-shaped command
+# Lock grid (18 points, last key fastest). Objective: max frame-weighted success AUC of the full
+# variant (`features`), ties -> first in grid order; that point is used by every variant.
+lock_grid:
+  coast_s: [1, 2, 4]  # MIL fallback limit, seconds
+  reid_thr: [0.5, 0.7, 0.9]  # appearance similarity floor at re-acquisition
+  gate_growth: [0.5, 1.0]  # motion-gate radius growth, box diagonals per second lost
+# Gimbal grid (12 points), driven by the GT box. Objective: min centring error; points within 5%
+# of the best -> min smoothness (RMS crop acceleration), then first in grid order.
+gimbal_grid:
+  kp: [0.5, 1, 2]
+  kd: [0, 0.2]
+  target_frac: [0.15, 0.25]

@@ -1,0 +1,16 @@
+# Batched tile engines for the deployment grid's tiled points (same students, precisions and tiling as the
+# `tiled` block of configs/deploy.yaml): the 640-px tiles go through a static batch-32 engine (a 4K
+# frame has exactly 32 tiles; a 1080p frame's 8 are zero-padded to 32) in one call instead of 32
+# calls of a static batch-1 engine.
+# The 1280 full-frame engines are the deployment grid's (export skips them when up to date).
+# register -> configs/models_deploy_tiles.yaml, used with
+#   --models configs/models.yaml,configs/models_deploy_tiles.yaml
+# (not together with configs/models_deploy.yaml: both define the 1280 engines).
+# `scripts\tiles.ps1` runs export, the same-session latency comparison and eval.
+students: [src_pseudo-yolo11n-s0, src_pseudo-yolo11s-s0, src_pseudo-yolo11m-s0]
+sizes: [1280]
+precisions: [fp16, int8]
+fp32_sizes: []
+tiled: {full_imgsz: 1280, tile: 640, overlap: 0.2, tile_batch: 32}
+calibration: {list: configs/train/src_pseudo.yaml, n: 512, seed: 0}
+bench: {every: 30, n: 199, warmup: 20}  # T-VN has 5,950 images: every 30th gives 199

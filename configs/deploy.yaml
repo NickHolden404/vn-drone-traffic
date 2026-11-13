@@ -1,0 +1,11 @@
+# TensorRT deployment grid (pre-declared before any evaluation).
+# Engines: `cvt deploy export` (GPU, user-run) -> data/engines/; registry: `cvt deploy register`
+# -> configs/models_deploy.yaml, evaluated with
+# `cvt eval --models configs/models.yaml,configs/models_deploy.yaml`.
+students: [src_pseudo-yolo11n-s0, src_pseudo-yolo11s-s0, src_pseudo-yolo11m-s0]
+sizes: [640, 960, 1280, 1536]
+precisions: [fp16, int8]
+fp32_sizes: [640, 1280]
+tiled: {full_imgsz: 1280, tile: 640, overlap: 0.2}
+calibration: {list: configs/train/src_pseudo.yaml, n: 512, seed: 0}
+bench: {every: 30, n: 199, warmup: 20}  # T-VN has 5,950 images: every 30th gives 199

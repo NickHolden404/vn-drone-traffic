@@ -1,0 +1,11 @@
+# ByteTrack, Ultralytics 8.4.173 defaults (ultralytics/cfg/trackers/bytetrack.yaml) + name, frame_rate.
+# frame_rate is recorded for provenance; the 8.4.173 trackers do not read it (buffer = track_buffer frames).
+name: bytetrack
+frame_rate: 30
+tracker_type: bytetrack
+track_high_thresh: 0.25
+track_low_thresh: 0.1
+new_track_thresh: 0.25
+track_buffer: 30
+match_thresh: 0.8
+fuse_score: true

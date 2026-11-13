@@ -1,0 +1,88 @@
+# Active learning on Vietnamese drone footage. Every value is pre-declared
+# before any evaluation; nothing here is chosen from
+# T-VN / T-VD results. `cvt al prepare` turns it into reports/al_rankings.parquet, the revealed-label
+# exports (data/yolo/al/<pick set>.txt), configs/train/al/<run>.yaml, configs/train_queue_al.yaml and
+# configs/models_al.yaml.
+
+pool_set: UD-pool
+# per-frame fused-teacher disagreement D on the pool (`scripts\al.ps1 -Step score`); only
+# `disagreement` is used, the pseudo-labels never reach training
+scores: data/pseudo/teacher-fused-udpool
+budgets: [100, 200, 400, 800]  # nested: budget b = first b frames of a ranking
+repeat: 5  # picks list repeated in every run's train list (all-pool runs: once)
+strategies:
+  random: {seed: 0}  # ranking seeds 1, 2: variance runs `-r1`, `-r2`
+  disagree: {}  # D descending, ties by image_id
+  variety: {gaps: [15, 5, 0]}  # clip round-robin, highest D at least `gap` frames from that clip's picks
+
+# identical for every run; job args = the original student job's args (`plan2_queue`, students.*.plan2_job)
+# overridden by `recipe`, the student's batch and the run's training seed
+recipe: {epochs: 15, imgsz: 1280, optimizer: AdamW, lr0: 0.0005, warmup_epochs: 1, close_mosaic: 3,
+         patience: 0, val: false, cos_lr: true, workers: 4}
+plan2_queue: configs/train_queue.yaml
+students:
+  s: {init: runs/students/src_pseudo-yolo11s-s0/weights/best.pt, batch: 8, plan2_job: src_pseudo-yolo11s-s0}
+  m: {init: runs/students/src_pseudo-yolo11m-s0/weights/best.pt, batch: 4, plan2_job: src_pseudo-yolo11m-s0}
+base_train: [data/yolo/VD-train.txt, data/yolo/P-train-teacher-fused.txt]
+val: [data/yolo/VD-tune.txt, data/yolo/P-val-teacher-fused.txt]
+
+# Run inventory (fixed):
+# | Group | Runs |
+# |---|---|
+# | `al_curve` (s) | `al-s-{random,disagree,variety}-{100,200,400,800}` (12) |
+# | `al_variance` (s) | `al-s-random-400-r1`, `al-s-random-400-r2` (ranking seeds), `al-s-variety-400-t1`, `al-s-variety-400-t2` (training seeds) |
+# | `al_upper` (s) | `al-s-all` |
+# | `al_headline` (m) | `al-m-variety-800` (primary), `al-m-random-800`, `al-m-all` |
+# Queue order within a group is the order below (curve: budget by budget, so each budget's paired
+# comparisons are complete as early as possible). ranking_seed: random ranking seed (default
+# strategies.random.seed); seed: training seed (default 0). strategy `all`: every pool frame, once.
+runs:
+  - {name: al-s-random-100, group: al_curve, student: s, strategy: random, budget: 100}
+  - {name: al-s-disagree-100, group: al_curve, student: s, strategy: disagree, budget: 100}
+  - {name: al-s-variety-100, group: al_curve, student: s, strategy: variety, budget: 100}
+  - {name: al-s-random-200, group: al_curve, student: s, strategy: random, budget: 200}
+  - {name: al-s-disagree-200, group: al_curve, student: s, strategy: disagree, budget: 200}
+  - {name: al-s-variety-200, group: al_curve, student: s, strategy: variety, budget: 200}
+  - {name: al-s-random-400, group: al_curve, student: s, strategy: random, budget: 400}
+  - {name: al-s-disagree-400, group: al_curve, student: s, strategy: disagree, budget: 400}
+  - {name: al-s-variety-400, group: al_curve, student: s, strategy: variety, budget: 400}
+  - {name: al-s-random-800, group: al_curve, student: s, strategy: random, budget: 800}
+  - {name: al-s-disagree-800, group: al_curve, student: s, strategy: disagree, budget: 800}
+  - {name: al-s-variety-800, group: al_curve, student: s, strategy: variety, budget: 800}
+  - {name: al-s-random-400-r1, group: al_variance, student: s, strategy: random, budget: 400, ranking_seed: 1}
+  - {name: al-s-random-400-r2, group: al_variance, student: s, strategy: random, budget: 400, ranking_seed: 2}
+  - {name: al-s-variety-400-t1, group: al_variance, student: s, strategy: variety, budget: 400, seed: 1}
+  - {name: al-s-variety-400-t2, group: al_variance, student: s, strategy: variety, budget: 400, seed: 2}
+  - {name: al-s-all, group: al_upper, student: s, strategy: all}
+  - {name: al-m-variety-800, group: al_headline, student: m, strategy: variety, budget: 800}  # primary
+  - {name: al-m-random-800, group: al_headline, student: m, strategy: random, budget: 800}
+  - {name: al-m-all, group: al_headline, student: m, strategy: all}
+
+# Comparisons (paired cluster bootstrap on T-VN and T-VD, existing `cvt compare`; deltas a - b):
+# al-s-{disagree,variety}-{b} vs al-s-random-{b} for each budget; al-m-variety-800 vs al-m-random-800;
+# al-m-variety-800 vs src_pseudo-yolo11m-s0.
+compare_sets: [T-VN, T-VD]
+comparisons:
+  - {a: al-s-disagree-100, b: al-s-random-100}
+  - {a: al-s-variety-100, b: al-s-random-100}
+  - {a: al-s-disagree-200, b: al-s-random-200}
+  - {a: al-s-variety-200, b: al-s-random-200}
+  - {a: al-s-disagree-400, b: al-s-random-400}
+  - {a: al-s-variety-400, b: al-s-random-400}
+  - {a: al-s-disagree-800, b: al-s-random-800}
+  - {a: al-s-variety-800, b: al-s-random-800}
+  - {a: al-m-variety-800, b: al-m-random-800}
+  - {a: al-m-variety-800, b: src_pseudo-yolo11m-s0}
+# Headline engine: al-m-variety-800 exported to TensorRT FP16 at 1280 (the other two m runs too,
+# for the table).
+headline: al-m-variety-800
+engines: {imgsz: 1280, precision: fp16, models: [al-m-variety-800, al-m-random-800, al-m-all]}
+# Secondary fallbacks (pre-declared 2026-11-03, after training and before any T-VN evaluation of an
+# AL run): the primary run at 1536 px and tiled (full frame 1280 + 640-px tiles),
+# both TensorRT FP16 from configs/deploy_al_fallback.yaml. Reported next to the headline, never
+# instead of it: the headline sentence's verdict stays on `engines` above.
+fallbacks:
+  config: configs/deploy_al_fallback.yaml
+  points:
+    - {name: al-m-variety-800@1536-fp16, imgsz: 1536, label: 1536 px input}
+    - {name: al-m-variety-800@1280+tiles640-fp16, imgsz: 1280, label: tiled (1280 + 640-px tiles)}

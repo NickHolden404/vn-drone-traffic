@@ -1,0 +1,17 @@
+# follow parameters tuned on MOT-tune (src_pseudo-yolo11m-s0@1536-fp16+botsort-tuned3b, 148 lock tests): lock best of 18 by success AUC of lock-features (0.5039); gimbal best of 12 by centring error (0.2080, smoothness among points within 5%); written by `cvt follow tune`, grids in reports/follow_grid_lock.csv and reports/follow_grid_gimbal.csv
+set: MOT-tune
+detector: src_pseudo-yolo11m-s0@1536-fp16
+tracker: botsort-tuned3b
+lock:
+  coast_s: 4
+  reid_thr: 0.7
+  gate_growth: 0.5
+gimbal:
+  kp: 2
+  kd: 0.2
+  target_frac: 0.15
+objective:
+  lock_success_auc: 0.5039486039041264
+  gimbal_centre_err: 0.20801955229606142
+  gimbal_smooth: 0.8325427406089909
+  n_targets: 148

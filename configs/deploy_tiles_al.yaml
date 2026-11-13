@@ -1,0 +1,11 @@
+# Batched tile engine for the active-learning primary run's tiled fallback (configs/deploy_al_fallback.yaml):
+# same model, tiling and FP16, tiles through a static batch-32 engine. Students come from
+# configs/models_al.yaml. register -> configs/models_deploy_tiles_al.yaml, used with
+#   --models configs/models.yaml,configs/models_al.yaml,configs/models_deploy_tiles_al.yaml
+students: [al-m-variety-800]
+sizes: [1280]
+precisions: [fp16]
+fp32_sizes: []
+tiled: {full_imgsz: 1280, tile: 640, overlap: 0.2, tile_batch: 32}
+calibration: {list: configs/train/src_pseudo.yaml, n: 512, seed: 0}
+bench: {every: 30, n: 199, warmup: 20}  # T-VN has 5,950 images: every 30th gives 199

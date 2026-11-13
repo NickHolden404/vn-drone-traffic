@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Drone traffic analytics for motorbike-heavy Vietnamese streets"
+abstract: >
+  Drone video pipeline for Ho Chi Minh City traffic built without hand annotation: pseudo-labelled
+  YOLO11 students, active learning, TensorRT deployment, multi-object tracking and counting,
+  click-to-lock target follow with a virtual gimbal, and traffic analytics (flight-log scale,
+  speeds, turning movements, stopped and wrong-way events), each evaluated on frozen
+  human-labelled test sets with bootstrap confidence intervals.
+type: software
+authors:
+  - family-names: "Baranenkov"
+    given-names: "Vladislav"
+repository-code: "https://github.com/NickHolden404/vn-drone-traffic"
+license: AGPL-3.0
+keywords:
+  - "drone"
+  - "UAV"
+  - "traffic analytics"
+  - "object detection"
+  - "multi-object tracking"
+  - "pseudo-labels"
+  - "active learning"
+  - "TensorRT"
+  - "Vietnam"

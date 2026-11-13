@@ -1,0 +1,15 @@
+# botsort-tuned: rule-6 grid on MOT-tune, detector src_pseudo-yolo11s-s0, best of 54 by class-combined HOTA (0.4831); written by `cvt track tune`, grid in reports/tracker_grid_botsort.csv
+name: botsort-tuned
+frame_rate: 30
+tracker_type: botsort
+track_high_thresh: 0.2
+track_low_thresh: 0.1
+new_track_thresh: 0.5
+track_buffer: 60
+match_thresh: 0.8
+fuse_score: true
+gmc_method: sparseOptFlow
+proximity_thresh: 0.5
+appearance_thresh: 0.8
+with_reid: false
+model: auto

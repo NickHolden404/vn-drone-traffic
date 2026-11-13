@@ -1,0 +1,6 @@
+# Counting line drawn 2026-10-23 on frame 0 only (grid + ignore regions), before any tracker output.
+seq_id: uav0000297_02761_v
+set_name: T-MOT
+ref_frame: 0
+lines:
+  - {name: road_below_bridge, p1: [60, 900], p2: [1700, 900]}

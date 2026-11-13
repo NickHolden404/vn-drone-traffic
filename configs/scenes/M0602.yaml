@@ -1,0 +1,6 @@
+# Counting line drawn 2026-10-23 on frame 0 only (grid + ignore regions), before any tracker output.
+seq_id: M0602
+set_name: T-UAVDT
+ref_frame: 0
+lines:
+  - {name: highway_toll, p1: [590, 370], p2: [845, 370]}

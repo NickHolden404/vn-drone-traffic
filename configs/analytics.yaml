@@ -1,0 +1,47 @@
+# Traffic analytics (cvt analytics ...; scripts\analytics.ps1). Every value is fixed
+# before any run on A-LONG; nothing here is tuned on the anomaly labels.
+detector: src_pseudo-yolo11m-s0@1536-fp16
+models: configs/models.yaml,configs/models_deploy.yaml
+tracker: configs/trackers/botsort.tuned3b.src_pseudo-yolo11m-s0@1536-fp16.yaml
+imgsz: 1536
+conf: 0.01
+set_name: A-LONG
+clips_dir: data/external/uitadrone/videos
+labels_dir: data/external/uitadrone/test_frame_mask
+label_step: 5            # one label per 5th video frame: label i <-> frame 5*i
+label_alias:
+  50m_90d_morning_16_3: 50m_90d_morning_ngatuanninh_16_3
+  50m_90d_morning_22_3: 50m_90d_morning_ngatuanninh_22_3
+  70m_90d_morning_4_3: 70m_90d_morning_ngatuanninh_4_3
+held_out: [50m_90d_morning_16_3, 50m_90d_morning_22_3, 70m_90d_morning_4_3, DJI_0077, DJI_0096]
+cameras:
+  FC7303: {dfov_deg: 83.0, aspect: [4, 3]}   # DJI Mini 2; video assumed full sensor width
+car_length_m: 4.5
+ref_height_tol_m: 0.5
+stab_every: 5            # stabilize every 5th frame, interpolate between
+smooth_s: 0.5
+grid_m: 2.0
+od:
+  border_frac: 0.06
+  bandwidth: 0.03
+  min_sep: 0.06
+  min_tracks: 5
+  max_dist: 0.06
+  min_track_s: 1.0       # tracks shorter than this are not counted in OD / completeness
+events:
+  v_stop_kmh: 3.0
+  t_stop_s: 5.0
+  t_sat_s: 60.0
+  v_move_kmh: 5.0
+  angle_deg: 120.0
+  t_wrong_s: 1.0
+  min_passes: 20
+  min_concentration: 0.6
+  gap_s: 1.0             # missing frames / NaN-speed rows up to this long do not break a stop or
+                         # wrong-way run; any row where the condition is false does
+noise_floor: {min_span_frac: 0.9, max_disp_m: 2.0}
+od_sets: [T-MOT, T-UAVDT]
+scenes_dir: configs/scenes
+readme_clips: [DJI_0143, DJI_0075]
+n_boot: 1000
+seed: 0

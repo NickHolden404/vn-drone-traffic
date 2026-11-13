@@ -1,0 +1,6 @@
+# Counting line drawn 2026-10-23 on frame 0 only (grid + ignore regions), before any tracker output.
+seq_id: M0403
+set_name: T-UAVDT
+ref_frame: 0
+lines:
+  - {name: south_arm, p1: [280, 470], p2: [690, 470]}

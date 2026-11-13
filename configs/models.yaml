@@ -1,0 +1,96 @@
+# Detector registry. names_map keys live in cvt/data/classmaps.py::NAME_MAPS.
+oracle:
+  arch: oracle
+dronefreak-yolo11n:
+  arch: yolo
+  weights: data/weights/dronefreak/visdrone-yolov11n.pt
+  names_map: visdrone
+  rider_merge: true
+dronefreak-yolo11s:
+  arch: yolo
+  weights: data/weights/dronefreak/visdrone-yolov11s.pt
+  names_map: visdrone
+  rider_merge: true
+dronefreak-yolo11x:
+  arch: yolo
+  weights: data/weights/dronefreak/visdrone-yolov11x.pt
+  names_map: visdrone
+  rider_merge: true
+
+# --- teachers (trained via scripts/train.ps1 -Group teachers) and composites
+teacher-yolo11x:
+  arch: yolo
+  weights: runs/teachers/yolo11x/weights/best.pt
+  names_map: cvt
+teacher-rtdetrx:
+  arch: rtdetr
+  weights: runs/teachers/rtdetrx/weights/best.pt
+  names_map: cvt
+teacher-yolo11x-tiled:
+  arch: tiled
+  base: teacher-yolo11x
+  tile: 640
+  overlap: 0.2
+teacher-rtdetrx-tiled:
+  arch: tiled
+  base: teacher-rtdetrx
+  tile: 640
+  overlap: 0.2
+teacher-fused:
+  arch: fused
+  members: [teacher-yolo11x-tiled, teacher-rtdetrx-tiled]
+  iou: 0.55
+
+# --- students (trained via scripts/train.ps1 -Group students|seeds)
+src-yolo11n-s0:
+  arch: yolo
+  weights: runs/students/src-yolo11n-s0/weights/best.pt
+  names_map: cvt
+src-yolo11s-s0:
+  arch: yolo
+  weights: runs/students/src-yolo11s-s0/weights/best.pt
+  names_map: cvt
+src-yolo11m-s0:
+  arch: yolo
+  weights: runs/students/src-yolo11m-s0/weights/best.pt
+  names_map: cvt
+src_pseudo-yolo11n-s0:
+  arch: yolo
+  weights: runs/students/src_pseudo-yolo11n-s0/weights/best.pt
+  names_map: cvt
+src_pseudo-yolo11s-s0:
+  arch: yolo
+  weights: runs/students/src_pseudo-yolo11s-s0/weights/best.pt
+  names_map: cvt
+src_pseudo-yolo11m-s0:
+  arch: yolo
+  weights: runs/students/src_pseudo-yolo11m-s0/weights/best.pt
+  names_map: cvt
+pseudo-yolo11n-s0:
+  arch: yolo
+  weights: runs/students/pseudo-yolo11n-s0/weights/best.pt
+  names_map: cvt
+pseudo-yolo11s-s0:
+  arch: yolo
+  weights: runs/students/pseudo-yolo11s-s0/weights/best.pt
+  names_map: cvt
+pseudo-yolo11m-s0:
+  arch: yolo
+  weights: runs/students/pseudo-yolo11m-s0/weights/best.pt
+  names_map: cvt
+src-yolo11s-s1:
+  arch: yolo
+  weights: runs/students/src-yolo11s-s1/weights/best.pt
+  names_map: cvt
+src_pseudo-yolo11s-s1:
+  arch: yolo
+  weights: runs/students/src_pseudo-yolo11s-s1/weights/best.pt
+  names_map: cvt
+src-yolo11s-s2:
+  arch: yolo
+  weights: runs/students/src-yolo11s-s2/weights/best.pt
+  names_map: cvt
+src_pseudo-yolo11s-s2:
+  arch: yolo
+  weights: runs/students/src_pseudo-yolo11s-s2/weights/best.pt
+  names_map: cvt

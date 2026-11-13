@@ -1,0 +1,82 @@
+# Public benchmarks for the target lock (`cvt follow sot-detect` / `cvt follow sot-eval`,
+# scripts\follow.ps1 -Step sot-detect | sot-eval). Declared 2026-11-09, before any detection or
+# score on these sets; never tuned or selected on: they use the frozen configs/follow.tuned.yaml.
+# Each sequence is one lock test: initialised from its first annotated GT box, run end to end
+# (m@1536 detection -> BoT-SORT-3b with GMC -> lock) to its last frame, scored on annotated
+# frames. Frame rate: UAVDT and UAV123 / UAV20L are 30 fps per their papers (recorded assumption;
+# the fps used is configs/follow.yaml `fps`). Native formats: see cvt/follow/sot_data.py.
+
+# tracked classes (detections of other classes are dropped before tracking): vehicles only
+classes: [car, truck, bus, motorbike]
+
+# UAVDT-S: all 50 sequences (vehicles). 50 annotation files, 50 frame folders, frame counts equal
+# to annotation rows everywhere: nothing excluded. A pHash check of every frame against the
+# training/tuning-side images only (roles train, tune, pool = VD-train, VD-tune,
+# UD-pool, P-train, P-val, MOT-tune) runs before scoring; matched sequences are dropped by rule
+# and listed in reports/follow_sot_leakage.csv and the result notes. Overlap with a test set (e.g.
+# T-UAVDT, the UAVDT MOT test set, which shares source videos) is not leakage and drops nothing.
+uavdt_s:
+  root: data/external/uavdt_sot
+  sequences: [S0101, S0102, S0103, S0201, S0301, S0302, S0303, S0304, S0305, S0306, S0307, S0308,
+              S0309, S0310, S0401, S0402, S0501, S0601, S0602, S0701, S0801, S0901, S1001, S1101,
+              S1201, S1202, S1301, S1302, S1303, S1304, S1305, S1306, S1307, S1308, S1309, S1310,
+              S1311, S1312, S1313, S1401, S1501, S1601, S1602, S1603, S1604, S1605, S1606, S1607,
+              S1701, S1702]
+  excluded: {}
+
+# UAV123 vehicle subset: the real car* and truck* sequences; other classes are
+# outside a detector-based lock and not scored. name: [video folder, start frame, end frame].
+# Ranges: the official (startFrame, endFrame) of each sequence from
+# the UAV123 toolkit's data/external/uav123/UAV123/configSeqs.m (cell array seqUAV123), parsed by
+# `cvt.follow.sot_data.parse_config_seqs`; the loader re-checks them against configSeqs.m, and
+# that every range has one annotation row per frame and all its frames on disk. Cross-check only
+# (logged, never a source): the 12 pieces of UAV20L videos (car1_*, car6_*, car8_*, car16_*) align
+# against the UAV20L full-length annotation at their official start; car1_2 and car6_1 differ in
+# their last 2 rows by 1-2 px (875/877 and 485/487 rows equal), the others match exactly. truck2
+# is officially frames 1..385 of its 601-frame folder.
+uav123_veh:
+  root: data/external/uav123/UAV123
+  sequences:
+    car1_1: [car1, 1, 751]
+    car1_2: [car1, 751, 1627]
+    car1_3: [car1, 1627, 2629]
+    car2: [car2, 1, 1321]
+    car3: [car3, 1, 1717]
+    car4: [car4, 1, 1345]
+    car5: [car5, 1, 745]
+    car6_1: [car6, 1, 487]
+    car6_2: [car6, 487, 1807]
+    car6_3: [car6, 1807, 2953]
+    car6_4: [car6, 2953, 3925]
+    car6_5: [car6, 3925, 4861]
+    car7: [car7, 1, 1033]
+    car8_1: [car8, 1, 1357]
+    car8_2: [car8, 1357, 2575]
+    car9: [car9, 1, 1879]
+    car10: [car10, 1, 1405]
+    car11: [car11, 1, 337]
+    car12: [car12, 1, 499]
+    car13: [car13, 1, 415]
+    car14: [car14, 1, 1327]
+    car15: [car15, 1, 469]
+    car16_1: [car16, 1, 415]
+    car16_2: [car16, 415, 1993]
+    car17: [car17, 1, 1057]
+    car18: [car18, 1, 1207]
+    truck1: [truck1, 1, 463]
+    truck2: [truck2, 1, 385]
+    truck3: [truck3, 1, 535]
+    truck4_1: [truck4, 1, 577]
+    truck4_2: [truck4, 577, 1261]
+  excluded:
+    car1_s: simulator render, not a real UAV video
+    car2_s: simulator render, not a real UAV video
+    car3_s: simulator render, not a real UAV video
+    car4_s: simulator render, not a real UAV video
+
+# UAV20L vehicle subset: full-length videos, frame 1 to the last (one annotation row
+# per frame, NaN rows where the target is absent: 205 in car1).
+uav20l_veh:
+  root: data/external/uav123/UAV123
+  sequences: [car1, car3, car6, car8, car9, car16]
+  excluded: {}

@@ -1,0 +1,16 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      # the ml extra (PyTorch, OpenCV, TensorRT wheels) is ~6 GB; the tests need it but no GPU
+      - name: Free disk space
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
+      - run: uv sync --locked --python 3.12 --extra ml
+      - run: uv run --extra ml ruff check .
+      - run: uv run --extra ml pytest -q

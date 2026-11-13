@@ -1,0 +1,14 @@
+# VisDrone-only manifest, used until the UIT-Drone7 images are downloaded (then use datasets.yaml).
+# Paths are relative to the repo root.
+sources:
+  visdrone_det:
+    train_dir: data/external/visdrone/VisDrone2019-DET-train
+    val_dir: data/external/visdrone/VisDrone2019-DET-val
+    # Day-1 check (scripts/rider_check.py, 2026-10-05): 27,059 VisDrone-train `people` boxes;
+    # 46.8% are >=50% inside a motor/bicycle and 9.7% are 25-50% inside (94.6% of those with feet
+    # on the bike). Mosaics confirm riders -> merge (>=50% inside, or >=25% with feet on vehicle).
+    rider_merge: true
+    tune_frac: 0.10     # VD-tune carve-out, by sequence
+# pre-flight row counts: set -> [images, scenes], checked before exclusions
+expected:
+  T-VD: [548, 76]

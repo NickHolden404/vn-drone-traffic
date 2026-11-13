@@ -1,0 +1,17 @@
+# BoT-SORT, Ultralytics 8.4.173 defaults (ultralytics/cfg/trackers/botsort.yaml) + name, frame_rate.
+# frame_rate is recorded for provenance; the 8.4.173 trackers do not read it (buffer = track_buffer frames).
+# with_reid must stay false (no ReID model on cached detections); GMC warps are precomputed.
+name: botsort
+frame_rate: 30
+tracker_type: botsort
+track_high_thresh: 0.25
+track_low_thresh: 0.1
+new_track_thresh: 0.25
+track_buffer: 30
+match_thresh: 0.8
+fuse_score: true
+gmc_method: sparseOptFlow
+proximity_thresh: 0.5
+appearance_thresh: 0.8
+with_reid: false
+model: auto

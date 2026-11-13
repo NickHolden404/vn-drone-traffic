@@ -1,0 +1,90 @@
+# Paths are relative to the repo root.
+sources:
+  visdrone_det:
+    train_dir: data/external/visdrone/VisDrone2019-DET-train
+    val_dir: data/external/visdrone/VisDrone2019-DET-val
+    # Day-1 check (scripts/rider_check.py, 2026-10-05): 27,059 VisDrone-train `people` boxes;
+    # 46.8% are >=50% inside a motor/bicycle and 9.7% are 25-50% inside (94.6% of those with feet
+    # on the bike). Mosaics confirm riders -> merge (>=50% inside, or >=25% with feet on vehicle).
+    rider_merge: true
+    tune_frac: 0.10     # VD-tune carve-out, by sequence
+  uitdrone7:
+    images_dir: data/external/uitdrone7/images
+    labels_dir: data/external/uitdrone7/annotations
+  pool:                         # UIT-ADrone subset (2026-10-09)
+    source: uitadrone
+    videos_dir: data/external/uitadrone/videos
+    frames_dir: data/pool/uitadrone/frames
+    index: data/pool/uitadrone/index.parquet
+    every_s: 1.0
+    videos:
+      - 50m_90d_morning_congkhuA_16_3.MP4
+      - 50m_90d_morning_congkhuA_22_3.MP4
+      - DJI_0065.MP4
+      - DJI_0070.MP4
+      - DJI_0072.MP4
+      - DJI_0075.MP4
+      - DJI_0099.MP4
+      - DJI_0104.MP4
+      - DJI_0141.MP4
+      - DJI_0143.MP4
+      - DJI_0144.MP4
+    val_videos: [DJI_0072, DJI_0141]   # one per remaining location (B, C)
+    # Excluded 2026-10-11: location A, the forested roundabout that is also
+    # T-VN clip uitdrone7/AIUit000004 (same place, other days; not pHash near-duplicates):
+    #   50m_90d_morning_16_3.MP4
+    #   50m_90d_morning_22_3.MP4
+    #   70m_90d_morning_4_3.MP4
+    #   DJI_0077.MP4
+    #   DJI_0096.MP4
+  # Tracking ground truth.
+  visdrone_mot:                   # val -> MOT-tune (tuning), test-dev -> T-MOT (frozen test)
+    val_dir: data/external/visdrone_mot/VisDrone2019-MOT-val
+    test_dir: data/external/visdrone_mot/VisDrone2019-MOT-test-dev
+    rider_merge: true             # same rule as visdrone_det
+    drop_sequences:               # leakage check 2026-10-23 (reports/leakage_scenes.csv)
+      - {seq: uav0000086_00000_v, reason: "2026-10-23 MOT-tune: same video as T-VD sequence 0000086 (95 near-duplicate frames)"}
+      - {seq: uav0000117_02622_v, reason: "2026-10-23 MOT-tune: same video as T-VD sequence 0000117 (66 near-duplicate frames)"}
+      - {seq: uav0000201_00000_v, reason: "2026-10-23 T-MOT: 7 frames identical to VD-train images (detector trained on them)"}
+      - {seq: uav0000297_00000_v, reason: "2026-10-23 T-MOT: 2 frames identical to VD-train images (detector trained on them)"}
+      - {seq: uav0000370_00001_v, reason: "2026-10-23 T-MOT: 1 near-duplicate of a VD-tune image (thresholds/model selection)"}
+  uavdt:                          # T-UAVDT: the official MOT test split
+    images_dir: data/external/uavdt/UAV-benchmark-M
+    gt_dir: data/external/uavdt/UAV-benchmark-MOTD_v1.0/GT
+    drop_sequences: []            # see below
+    # The download has no attribute folder. Split and attributes are copied verbatim from the
+    # official toolkit, data/external/uavdt/UAV-benchmark-MOTD_v1.0/CalculateTrakingAcc.m
+    # (seqDirs_overall, seqDirs_day/night/fog, _low/_medium/_high, _front/_side/_bird).
+    test_sequences: [M0203, M0205, M0208, M0209, M0403, M0601, M0602, M0606, M0701, M0801,
+                     M0802, M1001, M1004, M1007, M1009, M1101, M1301, M1302, M1303, M1401]
+    attributes:
+      daylight: [M0208, M0209, M0403, M0601, M0602, M0606, M0801, M0802, M1301, M1302, M1303,
+                 M1401]
+      night: [M0203, M0205, M1001, M1007, M1101]
+      fog: [M0701, M1004, M1009]
+      low_alt: [M0203, M0205, M0209, M0801, M0802, M1101, M1303, M1401]
+      medium_alt: [M0208, M0403, M0602, M0606, M1001, M1004, M1007, M1009, M1301, M1302]
+      high_alt: [M0601, M0701]
+      front_view: [M0208, M0209, M0403, M0601, M0602, M0606, M1001, M1004, M1007, M1101, M1301,
+                   M1401]
+      side_view: [M0205, M0209, M0403, M0601, M0606, M0802, M1101, M1302, M1303]
+      bird_view: [M0203, M0701, M0801, M1009]
+  # drop_sequences (optional, visdrone_mot and uavdt): whole sequences removed from whichever
+  # set holds them, test sets included -- the path for the leakage decision.
+  # Each entry is {seq: <sequence name, e.g. M0101>, reason: <why, with the date>}; an unknown
+  # sequence fails the build. The list is saved as data/manifest/seq_drops.parquet and is part of
+  # the manifest hash. Unlike configs/exclusions.txt (training-side images only, never test
+  # images), this is a recorded decision about a whole sequence. `expected` counts below are
+  # checked before the drops. Example:
+  #   drop_sequences:
+  #     - {seq: M0101, reason: "2026-11-02 near-duplicates of VisDrone-DET train scene X"}
+# pre-flight row counts: set -> [images, scenes], checked before exclusions
+expected:
+  T-VD: [548, 76]
+  T-VN: [5950, 12]
+  UD-pool: [9871, 17]
+  # MOT sets: [images, sequences]; official VisDrone-MOT val 7/2,846 and test-dev 17/6,635;
+  # UAVDT MOT test 20 sequences, frames = all frames on disk for those 20 (2026-10-23).
+  MOT-tune: [2846, 7]
+  T-MOT: [6635, 17]
+  T-UAVDT: [16592, 20]

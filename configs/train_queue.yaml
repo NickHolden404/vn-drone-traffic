@@ -1,0 +1,59 @@
+# Training jobs, run in order per group by `cvt train run --group <g> --hours <h>` (resumable).
+# Students/seeds pin optimizer=AdamW, lr0=0.001, warmup_bias_lr=0.0: exactly what optimizer=auto picks
+# below 10k iterations (6 classes: lr0 = 0.01 / (4 + 6)). Iterations = ceil(images / 64) x epochs, so auto
+# switches to MuSGD above ~10.6k training images at 60 epochs; src_pseudo (VD-train 5,540 + P-train ~4-5k)
+# sits at that edge and must not get a different optimizer than src. Teachers stay on auto:
+# VD-train 5,540 images -> 87 x 40 = 3,480 iterations, far below 10k.
+# The YOLO11x teacher starts from COCO yolo11x.pt, not dronefreak (trained on all of VisDrone train,
+# which contains VD-tune, and selected on VisDrone val = T-VD).
+jobs:
+  - {name: teacher-yolo11x, group: teachers, model: data/weights/ultralytics/yolo11x.pt,
+     data: configs/train/teacher.yaml, project: runs/teachers, run: yolo11x,
+     args: {imgsz: 1280, epochs: 40, batch: 2, patience: 10, cos_lr: true, close_mosaic: 5, workers: 4, seed: 0}}
+  - {name: teacher-rtdetrx, group: teachers, arch: rtdetr, model: data/weights/ultralytics/rtdetr-x.pt,
+     data: configs/train/teacher.yaml, project: runs/teachers, run: rtdetrx,
+     args: {imgsz: 1280, epochs: 40, batch: 2, patience: 10, cos_lr: true, close_mosaic: 5, workers: 4, seed: 0}}
+  - {name: src-yolo11s-s0, group: students, model: data/weights/ultralytics/yolo11s.pt,
+     data: configs/train/src.yaml, project: runs/students, run: src-yolo11s-s0,
+     args: {optimizer: AdamW, lr0: 0.001, warmup_bias_lr: 0.0, imgsz: 1280, epochs: 60, batch: 8, patience: 15, cos_lr: true, close_mosaic: 10, workers: 4, seed: 0}}
+  - {name: src_pseudo-yolo11s-s0, group: students, model: data/weights/ultralytics/yolo11s.pt,
+     data: configs/train/src_pseudo.yaml, project: runs/students, run: src_pseudo-yolo11s-s0,
+     args: {optimizer: AdamW, lr0: 0.001, warmup_bias_lr: 0.0, imgsz: 1280, epochs: 60, batch: 8, patience: 15, cos_lr: true, close_mosaic: 10, workers: 4, seed: 0}}
+  - {name: pseudo-yolo11s-s0, group: students, model: data/weights/ultralytics/yolo11s.pt,
+     data: configs/train/pseudo.yaml, project: runs/students, run: pseudo-yolo11s-s0,
+     args: {optimizer: AdamW, lr0: 0.001, warmup_bias_lr: 0.0, imgsz: 1280, epochs: 60, batch: 8, patience: 15, cos_lr: true, close_mosaic: 10, workers: 4, seed: 0}}
+  - {name: src-yolo11n-s0, group: students, model: data/weights/ultralytics/yolo11n.pt,
+     data: configs/train/src.yaml, project: runs/students, run: src-yolo11n-s0,
+     args: {optimizer: AdamW, lr0: 0.001, warmup_bias_lr: 0.0, imgsz: 1280, epochs: 60, batch: 16, patience: 15, cos_lr: true, close_mosaic: 10, workers: 4, seed: 0}}
+  - {name: src_pseudo-yolo11n-s0, group: students, model: data/weights/ultralytics/yolo11n.pt,
+     data: configs/train/src_pseudo.yaml, project: runs/students, run: src_pseudo-yolo11n-s0,
+     args: {optimizer: AdamW, lr0: 0.001, warmup_bias_lr: 0.0, imgsz: 1280, epochs: 60, batch: 16, patience: 15, cos_lr: true, close_mosaic: 10, workers: 4, seed: 0}}
+  - {name: pseudo-yolo11n-s0, group: students, model: data/weights/ultralytics/yolo11n.pt,
+     data: configs/train/pseudo.yaml, project: runs/students, run: pseudo-yolo11n-s0,
+     args: {optimizer: AdamW, lr0: 0.001, warmup_bias_lr: 0.0, imgsz: 1280, epochs: 60, batch: 16, patience: 15, cos_lr: true, close_mosaic: 10, workers: 4, seed: 0}}
+  - {name: src-yolo11m-s0, group: students, model: data/weights/ultralytics/yolo11m.pt,
+     data: configs/train/src.yaml, project: runs/students, run: src-yolo11m-s0,
+     args: {optimizer: AdamW, lr0: 0.001, warmup_bias_lr: 0.0, imgsz: 1280, epochs: 60, batch: 4, patience: 15, cos_lr: true, close_mosaic: 10, workers: 4, seed: 0}}
+  - {name: src_pseudo-yolo11m-s0, group: students, model: data/weights/ultralytics/yolo11m.pt,
+     data: configs/train/src_pseudo.yaml, project: runs/students, run: src_pseudo-yolo11m-s0,
+     args: {optimizer: AdamW, lr0: 0.001, warmup_bias_lr: 0.0, imgsz: 1280, epochs: 60, batch: 4, patience: 15, cos_lr: true, close_mosaic: 10, workers: 4, seed: 0}}
+  - {name: pseudo-yolo11m-s0, group: students, model: data/weights/ultralytics/yolo11m.pt,
+     data: configs/train/pseudo.yaml, project: runs/students, run: pseudo-yolo11m-s0,
+     args: {optimizer: AdamW, lr0: 0.001, warmup_bias_lr: 0.0, imgsz: 1280, epochs: 60, batch: 4, patience: 15, cos_lr: true, close_mosaic: 10, workers: 4, seed: 0}}
+  - {name: src-yolo11s-s1, group: seeds, model: data/weights/ultralytics/yolo11s.pt,
+     data: configs/train/src.yaml, project: runs/students, run: src-yolo11s-s1,
+     args: {optimizer: AdamW, lr0: 0.001, warmup_bias_lr: 0.0, imgsz: 1280, epochs: 60, batch: 8, patience: 15, cos_lr: true, close_mosaic: 10, workers: 4, seed: 1}}
+  - {name: src_pseudo-yolo11s-s1, group: seeds, model: data/weights/ultralytics/yolo11s.pt,
+     data: configs/train/src_pseudo.yaml, project: runs/students, run: src_pseudo-yolo11s-s1,
+     args: {optimizer: AdamW, lr0: 0.001, warmup_bias_lr: 0.0, imgsz: 1280, epochs: 60, batch: 8, patience: 15, cos_lr: true, close_mosaic: 10, workers: 4, seed: 1}}
+  - {name: src-yolo11s-s2, group: seeds, model: data/weights/ultralytics/yolo11s.pt,
+     data: configs/train/src.yaml, project: runs/students, run: src-yolo11s-s2,
+     args: {optimizer: AdamW, lr0: 0.001, warmup_bias_lr: 0.0, imgsz: 1280, epochs: 60, batch: 8, patience: 15, cos_lr: true, close_mosaic: 10, workers: 4, seed: 2}}
+  - {name: src_pseudo-yolo11s-s2, group: seeds, model: data/weights/ultralytics/yolo11s.pt,
+     data: configs/train/src_pseudo.yaml, project: runs/students, run: src_pseudo-yolo11s-s2,
+     args: {optimizer: AdamW, lr0: 0.001, warmup_bias_lr: 0.0, imgsz: 1280, epochs: 60, batch: 8, patience: 15, cos_lr: true, close_mosaic: 10, workers: 4, seed: 2}}
+  # smoke check of pause -> resume -> finalise; writes runs/smoke only
+  - {name: smoke-yolo11n, group: smoke, model: data/weights/ultralytics/yolo11n.pt,
+     data: configs/train/teacher.yaml, project: runs/smoke, run: yolo11n,
+     args: {imgsz: 320, epochs: 3, batch: 8, fraction: 0.02, workers: 2, seed: 0,
+            optimizer: AdamW, lr0: 0.001, warmup_bias_lr: 0.0, plots: false}}

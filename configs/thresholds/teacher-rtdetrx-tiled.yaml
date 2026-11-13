@@ -1,0 +1,12 @@
+model: teacher-rtdetrx-tiled
+set: VD-tune
+cache_tag: e87f93c8c59b
+imgsz: 1280
+conf: 0.01
+thresholds:
+  motorbike: 0.5519534349441528
+  car: 0.6300533413887024
+  bus: 0.734599232673645
+  truck: 0.5816702246665955
+  bicycle: 0.6002666354179382
+  pedestrian: 0.5521882772445679
